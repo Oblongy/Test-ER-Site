@@ -1,5 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  output: 'export',
+  distDir: 'dist',
   eslint: {
     ignoreDuringBuilds: true,
   },
@@ -9,6 +11,9 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
-}
+  // Ensure we don't try to use Node.js APIs in the browser
+  reactStrictMode: true,
+  swcMinify: true,
+};
 
-export default nextConfig
+export default nextConfig;
