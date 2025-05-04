@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'export',
+  // Remove the 'export' output mode to build a standard Next.js app with server features
   distDir: 'dist',
   eslint: {
     ignoreDuringBuilds: true,
