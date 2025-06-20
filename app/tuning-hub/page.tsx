@@ -21,7 +21,9 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { BracketSimulator } from "@/components/bracket-simulator"
-import { ReactionTimeAnalyzer } from "@/components/reaction-time-analyzer" // Import the new component
+import { ReactionTimeAnalyzer } from "@/components/reaction-time-analyzer"
+// Remove the import for DialInPredictor
+// - import { DialInPredictor } from "@/components/dial-in-predictor"
 
 // Mock data for community tunes
 const communityTunes = [

@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react"
 import Link from "next/link"
-import { ArrowRight, Settings, Calculator, Trophy, Gauge, Zap, Clock } from "lucide-react"
+import { ArrowRight, Settings, Calculator, Trophy, Gauge, Zap } from "lucide-react" // Removed Clock icon
 import { Button } from "@/components/ui/button"
 import { Button3D } from "@/components/ui/button-3d"
 import { NavBar } from "@/components/nav-bar"
@@ -88,12 +88,13 @@ export default function Home() {
       icon: <Zap className="h-10 w-10" />,
       link: "/ratio-maker?tab=performance",
     },
-    {
-      title: "Lap Timer",
-      description: "Track and analyze your lap times with precision. Compare sessions and monitor your progress.",
-      icon: <Clock className="h-10 w-10" />,
-      link: "#",
-    },
+    // Removed the "Lap Timer" item
+    // {
+    //   title: "Lap Timer",
+    //   description: "Track and analyze your lap times with precision. Compare sessions and monitor your progress.",
+    //   icon: <Clock className="h-10 w-10" />,
+    //   link: "#",
+    // },
   ]
 
   return (

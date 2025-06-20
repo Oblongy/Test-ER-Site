@@ -159,7 +159,10 @@ export function BracketSimulator({ run, dialIn }: BracketSimulatorProps) {
 
       // Display result
       ctx.font = "bold 20px Inter, sans-serif"
-      if (actualET < targetDialIn) {
+      if (actualRT < 0) {
+        ctx.fillStyle = "#ef4444" // Red for red light
+        ctx.fillText(`RED LIGHT! Fouled by ${Math.abs(actualRT).toFixed(3)}s`, width / 2, height - 10)
+      } else if (actualET < targetDialIn) {
         ctx.fillStyle = "#ef4444" // Red for breakout
         ctx.fillText("BROKE OUT!", width / 2, height - 10)
       } else if (actualET > targetDialIn + 0.05) {
@@ -200,7 +203,9 @@ export function BracketSimulator({ run, dialIn }: BracketSimulatorProps) {
           setCurrentET(actualET)
           setCurrentMPH(actualMPH)
           // Determine and set result
-          if (actualET < targetDialIn) {
+          if (actualRT < 0) {
+            setResult(`RED LIGHT! Fouled by ${Math.abs(actualRT).toFixed(3)}s`)
+          } else if (actualET < targetDialIn) {
             setResult("BROKE OUT!")
           } else if (actualET > targetDialIn + 0.05) {
             setResult("TOO SLOW!")
@@ -275,7 +280,7 @@ export function BracketSimulator({ run, dialIn }: BracketSimulatorProps) {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              style={{ backgroundColor: result === "ON DIAL!" ? "#22c55e" : "#ef4444" }}
+              style={{ backgroundColor: result && result.startsWith("ON DIAL!") ? "#22c55e" : "#ef4444" }}
             >
               <p className="text-xl font-bold text-white">{result}</p>
             </motion.div>

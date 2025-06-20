@@ -1,4 +1,7 @@
-// ... (imports)
+"use client"
+
+import { useRef, useEffect } from "react"
+import type { RatioVisualizerProps } from "./types" // Assuming RatioVisualizerProps is declared in a separate file
 
 export function RatioVisualizer({ gears, primaryGear, finalDrive, rpm, tireSize }: RatioVisualizerProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
