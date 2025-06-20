@@ -21,6 +21,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { BracketSimulator } from "@/components/bracket-simulator"
+import { ReactionTimeAnalyzer } from "@/components/reaction-time-analyzer" // Import the new component
 
 // Mock data for community tunes
 const communityTunes = [
@@ -278,7 +279,9 @@ export default function TuningHub() {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-3 bg-zinc-900">
+          <TabsList className="grid w-full grid-cols-4 bg-zinc-900">
+            {" "}
+            {/* Increased grid-cols to 4 */}
             <TabsTrigger value="my-tunes" className="data-[state=active]:bg-red-600 data-[state=active]:text-white">
               My Tunes
             </TabsTrigger>
@@ -290,6 +293,12 @@ export default function TuningHub() {
               className="data-[state=active]:bg-red-600 data-[state=active]:text-white"
             >
               Bracket Racing
+            </TabsTrigger>
+            <TabsTrigger
+              value="reaction-time"
+              className="data-[state=active]:bg-red-600 data-[state=active]:text-white"
+            >
+              Reaction Time
             </TabsTrigger>
           </TabsList>
 
@@ -561,7 +570,7 @@ export default function TuningHub() {
                             <th className="py-2 text-left">ET</th>
                             <th className="py-2 text-left">MPH</th>
                             <th className="py-2 text-left">RT</th>
-                            <th className="py-2 text-left">Actions</th> {/* Added Actions column */}
+                            <th className="py-2 text-left">Actions</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -682,7 +691,7 @@ export default function TuningHub() {
                 </Card>
               </div>
 
-              {/* New Card for Bracket Simulator */}
+              {/* Card for Bracket Simulator */}
               <div className="md:col-span-2">
                 <Card className="bg-zinc-900 text-white">
                   <CardHeader>
@@ -697,6 +706,11 @@ export default function TuningHub() {
                 </Card>
               </div>
             </div>
+          </TabsContent>
+
+          {/* New Tab Content for Reaction Time Analyzer */}
+          <TabsContent value="reaction-time" className="mt-6">
+            <ReactionTimeAnalyzer />
           </TabsContent>
         </Tabs>
       </div>
