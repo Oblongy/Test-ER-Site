@@ -78,9 +78,6 @@ interface GearConfig {
   gearCount: 5 | 6
   firstGear: number
   color: string
-  weight?: number
-  power?: number
-  torque?: number
   quarterMileTime?: number
   halfMileTime?: number
 }
@@ -99,7 +96,7 @@ export default function RatioMaker() {
   const [gearCount, setGearCount] = useState<5 | 6>(5)
   const [gears, setGears] = useState<number[]>([])
   const [rpm, setRpm] = useState(7500)
-  const [tireSize, setTireSize] = useState(26)
+  const [tireSize] = useState(15) // Fixed tire size at 15 inches
   const [activeTab, setActiveTab] = useState("calculator")
   const [spreadFactor, setSpreadFactor] = useState(0.8)
   const [savedConfigs, setSavedConfigs] = useState<GearConfig[]>([])
@@ -107,9 +104,6 @@ export default function RatioMaker() {
   const [saveDialogOpen, setSaveDialogOpen] = useState(false)
   const [selectedConfigs, setSelectedConfigs] = useState<string[]>([])
   const [selectedCar, setSelectedCar] = useState("1999 Mitsubishi Eclipse GSX")
-  const [carWeight, setCarWeight] = useState(3200)
-  const [carPower, setCarPower] = useState(210)
-  const [carTorque, setCarTorque] = useState(214)
   const [performanceMetrics, setPerformanceMetrics] = useState<PerformanceMetrics>({
     quarterMileTime: 0,
     quarterMileSpeed: 0,
@@ -137,7 +131,7 @@ export default function RatioMaker() {
   // Calculate performance metrics when relevant parameters change
   useEffect(() => {
     calculatePerformanceMetrics()
-  }, [gears, finalDrive, rpm, tireSize, carWeight, carPower, carTorque])
+  }, [gears, finalDrive, rpm, tireSize])
 
   // Load saved configurations from localStorage on component mount
   useEffect(() => {
@@ -158,38 +152,6 @@ export default function RatioMaker() {
       localStorage.setItem("savedGearConfigs", JSON.stringify(savedConfigs))
     }
   }, [savedConfigs])
-
-  // Load car-specific configuration when car changes
-  useEffect(() => {
-    const carConfig = savedConfigs.find((config) => config.car === selectedCar)
-    if (carConfig) {
-      // Don't automatically load the config, just show a notification or badge
-      // that there's a saved config for this car
-    } else {
-      // Set default values based on car type
-      if (selectedCar.includes("Corvette")) {
-        setCarWeight(3200)
-        setCarPower(400)
-        setCarTorque(400)
-      } else if (selectedCar.includes("Civic")) {
-        setCarWeight(2600)
-        setCarPower(160)
-        setCarTorque(140)
-      } else if (selectedCar.includes("Eclipse")) {
-        setCarWeight(3200)
-        setCarPower(210)
-        setCarTorque(214)
-      } else if (selectedCar.includes("Lancer")) {
-        setCarWeight(3200)
-        setCarPower(276)
-        setCarTorque(286)
-      } else {
-        setCarWeight(3200)
-        setCarPower(250)
-        setCarTorque(250)
-      }
-    }
-  }, [selectedCar])
 
   const calculateGearRatios = () => {
     // Start with the first gear
@@ -214,15 +176,9 @@ export default function RatioMaker() {
   }
 
   const calculatePerformanceMetrics = () => {
-    // Simple performance calculation based on power-to-weight ratio and gearing
-    // This is a simplified model and doesn't account for many real-world factors
-
-    const powerToWeightRatio = carPower / carWeight
-    const torqueToWeightRatio = carTorque / carWeight
-
-    // Quarter mile calculation (simplified)
-    const quarterMileTime = 12.5 - powerToWeightRatio * 10 + finalDrive / 10
-    const quarterMileSpeed = 100 + powerToWeightRatio * 100 - finalDrive * 2
+    // Simplified performance metrics calculation
+    const quarterMileTime = 13.5 - (1 / finalDrive) * 2
+    const quarterMileSpeed = 100 + (1 / finalDrive) * 50
 
     // Half mile calculation
     const halfMileTime = quarterMileTime * 1.6
@@ -234,6 +190,16 @@ export default function RatioMaker() {
       halfMileTime: Math.max(14, Math.min(25, halfMileTime)),
       halfMileSpeed: Math.max(100, Math.min(200, halfMileSpeed)),
     })
+  }
+
+  const handleSliderChange = (setter: (value: number) => void, value: number) => {
+    // Add a subtle animation effect when slider changes
+    const element = document.activeElement
+    if (element && element.classList.contains("slider-thumb")) {
+      element.classList.add("scale-125")
+      setTimeout(() => element.classList.remove("scale-125"), 200)
+    }
+    setter(value)
   }
 
   const updateGear = (index: number, value: number) => {
@@ -249,8 +215,7 @@ export default function RatioMaker() {
     tireSizeValue: number = tireSize,
   ) => {
     // Speed (mph) = (RPM × tire diameter × π) ÷ (gear ratio × final drive × 336)
-    const combinedRatio = gearRatio * finalDriveRatio
-    return (rpmValue * tireSizeValue * Math.PI) / (combinedRatio * 336)
+    return (rpmValue * tireSizeValue * Math.PI) / (gearRatio * finalDriveRatio * 336)
   }
 
   const exportData = () => {
@@ -260,9 +225,6 @@ export default function RatioMaker() {
       gears,
       rpm,
       tireSize,
-      carWeight,
-      carPower,
-      carTorque,
       performance: performanceMetrics,
       speeds: gears.map((gear) => calculateSpeed(gear)),
     }
@@ -302,9 +264,6 @@ export default function RatioMaker() {
       gearCount,
       firstGear,
       color,
-      weight: carWeight,
-      power: carPower,
-      torque: carTorque,
       quarterMileTime: performanceMetrics.quarterMileTime,
       halfMileTime: performanceMetrics.halfMileTime,
     }
@@ -332,13 +291,9 @@ export default function RatioMaker() {
     setFinalDrive(config.finalDrive)
     setGears([...config.gears])
     setRpm(config.rpm)
-    setTireSize(config.tireSize)
     setSpreadFactor(config.spreadFactor)
     setGearCount(config.gearCount)
     setFirstGear(config.firstGear)
-    if (config.weight) setCarWeight(config.weight)
-    if (config.power) setCarPower(config.power)
-    if (config.torque) setCarTorque(config.torque)
     setActiveTab("calculator")
   }
 
@@ -355,6 +310,22 @@ export default function RatioMaker() {
 
   const getCarSpecificConfigs = () => {
     return savedConfigs.filter((config) => config.car === selectedCar)
+  }
+
+  // Calculate RPM drop for 5th gear (or 4th to 5th in a 5-speed)
+  const calculateFifthGearDrop = () => {
+    if (gears.length < 5) return "-"
+
+    const fifthGearIndex = 4 // 5th gear (index 4)
+    const lastGearIndex = gears.length - 1
+
+    if (fifthGearIndex === lastGearIndex) {
+      return "-" // 5th is the last gear in a 5-speed
+    }
+
+    const fifthGear = gears[fifthGearIndex]
+    const sixthGear = gears[lastGearIndex]
+    return `${((1 - sixthGear / fifthGear) * 100).toFixed(1)}%`
   }
 
   return (
@@ -421,7 +392,7 @@ export default function RatioMaker() {
                     )}
                   </CardTitle>
                   <CardDescription className="text-gray-400">
-                    Select your car and enter its specifications
+                    Select your car and enter transmission specifications
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
@@ -439,45 +410,6 @@ export default function RatioMaker() {
                         ))}
                       </SelectContent>
                     </Select>
-                  </div>
-
-                  <div className="grid grid-cols-3 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="car-weight">Weight (lbs)</Label>
-                      <Input
-                        id="car-weight"
-                        type="number"
-                        min={1500}
-                        max={5000}
-                        value={carWeight}
-                        onChange={(e) => setCarWeight(Number.parseInt(e.target.value))}
-                        className="border-zinc-700 bg-zinc-800 text-white"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="car-power">Power (hp)</Label>
-                      <Input
-                        id="car-power"
-                        type="number"
-                        min={100}
-                        max={1000}
-                        value={carPower}
-                        onChange={(e) => setCarPower(Number.parseInt(e.target.value))}
-                        className="border-zinc-700 bg-zinc-800 text-white"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="car-torque">Torque (lb-ft)</Label>
-                      <Input
-                        id="car-torque"
-                        type="number"
-                        min={100}
-                        max={1000}
-                        value={carTorque}
-                        onChange={(e) => setCarTorque(Number.parseInt(e.target.value))}
-                        className="border-zinc-700 bg-zinc-800 text-white"
-                      />
-                    </div>
                   </div>
 
                   <div className="space-y-2">
@@ -502,8 +434,8 @@ export default function RatioMaker() {
                       max={6}
                       step={0.01}
                       value={[finalDrive]}
-                      onValueChange={(value) => setFinalDrive(value[0])}
-                      className="[&>span:first-child]:bg-red-600"
+                      onValueChange={(value) => handleSliderChange(setFinalDrive, value[0])}
+                      className="[&>span:first-child]:bg-red-600 transition-all duration-300 hover:scale-y-125"
                     />
                   </div>
 
@@ -529,8 +461,8 @@ export default function RatioMaker() {
                       max={5}
                       step={0.01}
                       value={[firstGear]}
-                      onValueChange={(value) => setFirstGear(value[0])}
-                      className="[&>span:first-child]:bg-red-600"
+                      onValueChange={(value) => handleSliderChange(setFirstGear, value[0])}
+                      className="[&>span:first-child]:bg-red-600 transition-all duration-300 hover:scale-y-125"
                     />
                   </div>
 
@@ -569,8 +501,8 @@ export default function RatioMaker() {
                       max={0.95}
                       step={0.01}
                       value={[spreadFactor]}
-                      onValueChange={(value) => setSpreadFactor(value[0])}
-                      className="[&>span:first-child]:bg-red-600"
+                      onValueChange={(value) => handleSliderChange(setSpreadFactor, value[0])}
+                      className="[&>span:first-child]:bg-red-600 transition-all duration-300 hover:scale-y-125"
                     />
                   </div>
 
@@ -618,36 +550,13 @@ export default function RatioMaker() {
                       max={12000}
                       step={100}
                       value={[rpm]}
-                      onValueChange={(value) => setRpm(value[0])}
-                      className="[&>span:first-child]:bg-red-600"
+                      onValueChange={(value) => handleSliderChange(setRpm, value[0])}
+                      className="[&>span:first-child]:bg-red-600 transition-all duration-300 hover:scale-y-125"
                     />
                   </div>
 
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <Label htmlFor="tire-size">Tire Diameter (inches)</Label>
-                      <div className="flex items-center">
-                        <Input
-                          id="tire-size-input"
-                          type="number"
-                          min={15}
-                          max={35}
-                          step={0.5}
-                          value={tireSize}
-                          onChange={(e) => setTireSize(Number.parseFloat(e.target.value))}
-                          className="w-20 border-zinc-700 bg-zinc-800 text-right text-white"
-                        />
-                      </div>
-                    </div>
-                    <Slider
-                      id="tire-size"
-                      min={15}
-                      max={35}
-                      step={0.5}
-                      value={[tireSize]}
-                      onValueChange={(value) => setTireSize(value[0])}
-                      className="[&>span:first-child]:bg-red-600"
-                    />
+                  <div className="p-4 bg-zinc-800 rounded-md">
+                    <p className="text-sm text-gray-400">Tire Diameter: 15 inches (fixed)</p>
                   </div>
                 </CardContent>
               </Card>
@@ -684,7 +593,7 @@ export default function RatioMaker() {
                         step={0.001}
                         value={[gear]}
                         onValueChange={(value) => updateGear(index, value[0])}
-                        className="[&>span:first-child]:bg-red-600"
+                        className="[&>span:first-child]:bg-red-600 transition-all duration-300 hover:scale-y-125"
                       />
                     </div>
                   ))}
@@ -740,9 +649,8 @@ export default function RatioMaker() {
                       <tr className="border-b border-zinc-800">
                         <th className="pb-2 text-left">Gear</th>
                         <th className="pb-2 text-left">Ratio</th>
-                        <th className="pb-2 text-left">Combined Ratio</th>
                         <th className="pb-2 text-left">Speed at {rpm.toLocaleString()} RPM</th>
-                        <th className="pb-2 text-left">RPM Drop to Next Gear</th>
+                        <th className="pb-2 text-left">RPM Drop</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -750,13 +658,20 @@ export default function RatioMaker() {
                         <tr key={index} className="border-b border-zinc-800">
                           <td className="py-2">{index + 1}</td>
                           <td className="py-2">{gear.toFixed(3)}</td>
-                          <td className="py-2">{(gear * finalDrive).toFixed(3)}</td>
                           <td className="py-2">{calculateSpeed(gear).toFixed(1)} mph</td>
                           <td className="py-2">
                             {index < gears.length - 1 ? `${((1 - gears[index + 1] / gear) * 100).toFixed(1)}%` : "-"}
                           </td>
                         </tr>
                       ))}
+                      {gearCount === 6 && (
+                        <tr className="border-b border-zinc-800 bg-zinc-800/30">
+                          <td className="py-2 font-medium" colSpan={3}>
+                            5th to 6th Gear Drop
+                          </td>
+                          <td className="py-2">{calculateFifthGearDrop()}</td>
+                        </tr>
+                      )}
                     </tbody>
                   </table>
                 </div>
@@ -908,9 +823,9 @@ export default function RatioMaker() {
                   finalDrive={finalDrive}
                   rpm={rpm}
                   tireSize={tireSize}
-                  carWeight={carWeight}
-                  carPower={carPower}
-                  carTorque={carTorque}
+                  carWeight={3200}
+                  carPower={250}
+                  carTorque={250}
                   car={selectedCar}
                 />
               </CardContent>

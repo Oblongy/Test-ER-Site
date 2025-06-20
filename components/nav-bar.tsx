@@ -63,6 +63,12 @@ export function NavBar() {
           >
             Bracket Maker
           </Link>
+          <Link
+            href="/auth"
+            className="text-sm font-medium text-gray-200 transition-all duration-300 hover:text-red-600 relative after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-0 after:bg-red-600 after:transition-all hover:after:w-full"
+          >
+            Sign In
+          </Link>
           <Button className="bg-red-600 text-white transition-all duration-300 hover:bg-red-700 hover:scale-105">
             Sign Up
           </Button>
@@ -114,6 +120,13 @@ export function NavBar() {
                 onClick={() => setIsOpen(false)}
               >
                 Bracket Maker
+              </Link>
+              <Link
+                href="/auth"
+                className="text-lg font-medium text-gray-200 transition-all duration-300 hover:text-red-600 hover:translate-x-2"
+                onClick={() => setIsOpen(false)}
+              >
+                Sign In
               </Link>
               <Button className="mt-4 w-full bg-red-600 text-white transition-all duration-300 hover:bg-red-700 hover:scale-105">
                 Sign Up

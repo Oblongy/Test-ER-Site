@@ -2,9 +2,14 @@
 
 import { useEffect, useRef, useState } from "react"
 import Link from "next/link"
-import { ArrowRight, Settings, Calculator, Trophy } from "lucide-react"
+import { ArrowRight, Settings, Calculator, Trophy, Gauge, Zap, Clock } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { Button3D } from "@/components/ui/button-3d"
 import { NavBar } from "@/components/nav-bar"
+import { AnimatedText } from "@/components/ui/animated-text"
+import { CardHoverEffect } from "@/components/ui/card-hover-effect"
+import { GradientBackground } from "@/components/ui/gradient-background"
+import { Spotlight } from "@/components/ui/spotlight"
 
 export default function Home() {
   const [isVisible, setIsVisible] = useState({
@@ -51,15 +56,57 @@ export default function Home() {
     }
   }, [])
 
+  const featureItems = [
+    {
+      title: "Ratio Maker",
+      description:
+        "Precision gear ratio calculator with visual output. Save and export your configurations for track day.",
+      icon: <Calculator className="h-10 w-10" />,
+      link: "/ratio-maker",
+    },
+    {
+      title: "Tuning Hub",
+      description: "Adjust car settings and share tunes with the community. Find the perfect setup for any track.",
+      icon: <Settings className="h-10 w-10" />,
+      link: "/tuning-hub",
+    },
+    {
+      title: "Bracket Maker",
+      description: "Create and share professional racing tournament brackets. Manage your events like a pro.",
+      icon: <Trophy className="h-10 w-10" />,
+      link: "/bracket-maker",
+    },
+    {
+      title: "Gear Analyzer",
+      description: "Visualize and analyze your transmission's gear ratios with interactive gauges and simulations.",
+      icon: <Gauge className="h-10 w-10" />,
+      link: "/gear-analyzer",
+    },
+    {
+      title: "Performance Simulator",
+      description: "Simulate quarter mile and half mile performance with your current gear ratios and vehicle specs.",
+      icon: <Zap className="h-10 w-10" />,
+      link: "/ratio-maker?tab=performance",
+    },
+    {
+      title: "Lap Timer",
+      description: "Track and analyze your lap times with precision. Compare sessions and monitor your progress.",
+      icon: <Clock className="h-10 w-10" />,
+      link: "#",
+    },
+  ]
+
   return (
     <div className="flex min-h-screen flex-col bg-black text-white">
       <NavBar />
 
       {/* Hero Section */}
-      <section className="relative flex h-screen flex-col items-center justify-center overflow-hidden px-4 text-center">
-        <div className="absolute inset-0 z-0 bg-gradient-to-b from-black via-black to-red-950/30 animate-gradient-shift"></div>
-        <div className="absolute inset-0 z-0 bg-[radial-gradient(ellipse_at_center,rgba(255,0,0,0.1),transparent_70%)] animate-pulse-subtle"></div>
-
+      <GradientBackground
+        colors={["#ef4444", "#991b1b", "#450a0a"]}
+        speed={5}
+        blur={150}
+        className="relative flex h-screen flex-col items-center justify-center overflow-hidden px-4 text-center"
+      >
         <div className="z-10 flex flex-col items-center space-y-6">
           <div className="mb-4 flex items-center justify-center animate-float">
             <div className="text-5xl font-black tracking-tighter sm:text-6xl md:text-7xl">
@@ -68,10 +115,11 @@ export default function Home() {
             </div>
           </div>
 
-          <h1 className="text-4xl font-extrabold tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl animate-slide-up">
-            <span className="text-white">ENVIOUS</span>
-            <span className="text-red-600"> RACING</span>
-          </h1>
+          <AnimatedText
+            text="ENVIOUS RACING"
+            className="text-4xl font-extrabold tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl"
+            highlightWords={["RACING"]}
+          />
 
           <p className="max-w-[600px] text-lg text-gray-400 sm:text-xl animate-slide-up stagger-1">
             Precision tools for serious racers. Calculate, tune, and compete with our professional-grade racing
@@ -79,15 +127,15 @@ export default function Home() {
           </p>
 
           <div className="mt-8 flex flex-wrap justify-center gap-4 animate-slide-up stagger-2">
-            <Button
-              asChild
+            <Button3D
+              color="red"
               size="lg"
-              className="bg-red-600 text-white hover:bg-red-700 transition-transform duration-300 hover:scale-105"
+              className="transition-transform duration-300 hover:scale-105"
+              onClick={() => (window.location.href = "/ratio-maker")}
             >
-              <Link href="/ratio-maker">
-                Get Started <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-            </Button>
+              Get Started <ArrowRight className="ml-2 h-4 w-4" />
+            </Button3D>
+
             <Button
               asChild
               variant="outline"
@@ -108,84 +156,20 @@ export default function Home() {
             <ArrowRight className="mt-1 h-4 w-4 rotate-90" />
           </Link>
         </div>
-      </section>
+      </GradientBackground>
 
       {/* Features Section */}
       <section id="features" className="py-20" ref={featuresRef}>
         <div className="container mx-auto px-4">
-          <h2
-            className={`mb-16 text-center text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl ${isVisible.features ? "animate-slide-up" : "opacity-0"}`}
-          >
-            <span className="text-red-600">Premium</span> Features
-          </h2>
+          <AnimatedText
+            text="Premium Features"
+            className="mb-16 text-center text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl"
+            highlightWords={["Premium"]}
+          />
 
-          <div className="grid gap-12 md:grid-cols-3">
-            {/* Ratio Maker */}
-            <div
-              className={`group relative overflow-hidden rounded-lg bg-zinc-900 p-6 transition-all duration-500 hover:bg-zinc-800 hover:shadow-lg hover:shadow-red-900/20 ${isVisible.features ? "animate-slide-up stagger-1" : "opacity-0"}`}
-            >
-              <div className="absolute -right-4 -top-4 h-24 w-24 rounded-full bg-red-600/10 transition-transform duration-500 group-hover:scale-[2]"></div>
-              <Calculator className="mb-4 h-10 w-10 text-red-600 transition-transform duration-300 group-hover:scale-110" />
-              <h3 className="mb-3 text-xl font-bold">Ratio Maker</h3>
-              <p className="mb-6 text-gray-400">
-                Precision gear ratio calculator with visual output. Save and export your configurations for track day.
-              </p>
-              <Button
-                asChild
-                variant="ghost"
-                className="text-red-600 hover:bg-red-950/20 hover:text-red-500 transition-all duration-300 group-hover:translate-x-1"
-              >
-                <Link href="/ratio-maker">
-                  Try It Now{" "}
-                  <ArrowRight className="ml-2 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
-                </Link>
-              </Button>
-            </div>
-
-            {/* Tuning Hub */}
-            <div
-              className={`group relative overflow-hidden rounded-lg bg-zinc-900 p-6 transition-all duration-500 hover:bg-zinc-800 hover:shadow-lg hover:shadow-red-900/20 ${isVisible.features ? "animate-slide-up stagger-2" : "opacity-0"}`}
-            >
-              <div className="absolute -right-4 -top-4 h-24 w-24 rounded-full bg-red-600/10 transition-transform duration-500 group-hover:scale-[2]"></div>
-              <Settings className="mb-4 h-10 w-10 text-red-600 transition-transform duration-300 group-hover:rotate-45" />
-              <h3 className="mb-3 text-xl font-bold">Tuning Hub</h3>
-              <p className="mb-6 text-gray-400">
-                Adjust car settings and share tunes with the community. Find the perfect setup for any track.
-              </p>
-              <Button
-                asChild
-                variant="ghost"
-                className="text-red-600 hover:bg-red-950/20 hover:text-red-500 transition-all duration-300 group-hover:translate-x-1"
-              >
-                <Link href="/tuning-hub">
-                  Try It Now{" "}
-                  <ArrowRight className="ml-2 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
-                </Link>
-              </Button>
-            </div>
-
-            {/* Bracket Maker */}
-            <div
-              className={`group relative overflow-hidden rounded-lg bg-zinc-900 p-6 transition-all duration-500 hover:bg-zinc-800 hover:shadow-lg hover:shadow-red-900/20 ${isVisible.features ? "animate-slide-up stagger-3" : "opacity-0"}`}
-            >
-              <div className="absolute -right-4 -top-4 h-24 w-24 rounded-full bg-red-600/10 transition-transform duration-500 group-hover:scale-[2]"></div>
-              <Trophy className="mb-4 h-10 w-10 text-red-600 transition-transform duration-300 group-hover:scale-110" />
-              <h3 className="mb-3 text-xl font-bold">Bracket Maker</h3>
-              <p className="mb-6 text-gray-400">
-                Create and share professional racing tournament brackets. Manage your events like a pro.
-              </p>
-              <Button
-                asChild
-                variant="ghost"
-                className="text-red-600 hover:bg-red-950/20 hover:text-red-500 transition-all duration-300 group-hover:translate-x-1"
-              >
-                <Link href="/bracket-maker">
-                  Try It Now{" "}
-                  <ArrowRight className="ml-2 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
-                </Link>
-              </Button>
-            </div>
-          </div>
+          <Spotlight>
+            <CardHoverEffect items={featureItems} />
+          </Spotlight>
         </div>
       </section>
 
@@ -193,25 +177,26 @@ export default function Home() {
       <section className="relative py-20" ref={ctaRef}>
         <div className="absolute inset-0 z-0 bg-gradient-to-t from-red-950/30 to-black animate-gradient-shift"></div>
         <div className="container relative z-10 mx-auto px-4 text-center">
-          <h2
-            className={`mb-6 text-3xl font-bold tracking-tight sm:text-4xl ${isVisible.cta ? "animate-slide-up" : "opacity-0"}`}
-          >
-            Ready to <span className="text-red-600">Dominate</span> the Track?
-          </h2>
+          <AnimatedText
+            text="Ready to Dominate the Track?"
+            className="mb-6 text-3xl font-bold tracking-tight sm:text-4xl"
+            highlightWords={["Dominate"]}
+          />
+
           <p
             className={`mx-auto mb-8 max-w-2xl text-gray-400 ${isVisible.cta ? "animate-slide-up stagger-1" : "opacity-0"}`}
           >
-            Join thousands of racers who trust Envious Racing tools for their competitive edge.
+            Join hundreds of racers who trust Envious Racing tools for their competitive edge.
           </p>
-          <Button
-            asChild
+
+          <Button3D
+            color="red"
             size="lg"
-            className={`bg-red-600 text-white hover:bg-red-700 transition-transform duration-300 hover:scale-105 ${isVisible.cta ? "animate-slide-up stagger-2" : "opacity-0"}`}
+            className={`transition-transform duration-300 hover:scale-105 ${isVisible.cta ? "animate-slide-up stagger-2" : "opacity-0"}`}
+            onClick={() => (window.location.href = "/ratio-maker")}
           >
-            <Link href="/ratio-maker">
-              Get Started Now <ArrowRight className="ml-2 h-4 w-4" />
-            </Link>
-          </Button>
+            Get Started Now <ArrowRight className="ml-2 h-4 w-4" />
+          </Button3D>
         </div>
       </section>
 

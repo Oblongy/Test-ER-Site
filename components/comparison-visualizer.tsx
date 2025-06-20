@@ -14,9 +14,6 @@ interface GearConfig {
   gearCount: 5 | 6
   firstGear: number
   color: string
-  weight?: number
-  power?: number
-  torque?: number
   quarterMileTime?: number
   halfMileTime?: number
 }
@@ -57,8 +54,7 @@ export function ComparisonVisualizer({ configs }: ComparisonVisualizerProps) {
 
     configs.forEach((config) => {
       config.gears.forEach((gear) => {
-        const combinedRatio = gear * config.finalDrive
-        const speed = (config.rpm * config.tireSize * Math.PI) / (combinedRatio * 336)
+        const speed = (config.rpm * config.tireSize * Math.PI) / (gear * config.finalDrive * 336)
         allSpeeds.push(speed)
       })
       allRpms.push(config.rpm)
@@ -89,9 +85,6 @@ export function ComparisonVisualizer({ configs }: ComparisonVisualizerProps) {
 
       // Draw each gear curve
       config.gears.forEach((gear, gearIndex) => {
-        // Calculate combined ratio
-        const combinedRatio = gear * config.finalDrive
-
         // Draw gear curve
         ctx.strokeStyle = color
         ctx.lineWidth = 2.5
@@ -100,7 +93,7 @@ export function ComparisonVisualizer({ configs }: ComparisonVisualizerProps) {
         for (let speed = 0; speed <= maxSpeed; speed += maxSpeed / 200) {
           // Calculate RPM for this speed
           // RPM = (speed × gear ratio × final drive × 336) ÷ (tire diameter × π)
-          const calculatedRPM = (speed * combinedRatio * 336) / (config.tireSize * Math.PI)
+          const calculatedRPM = (speed * gear * config.finalDrive * 336) / (config.tireSize * Math.PI)
 
           if (calculatedRPM <= config.rpm) {
             const x = padding.left + (speed / maxSpeed) * chartWidth

@@ -9,22 +9,10 @@ interface PerformanceSimulatorProps {
   finalDrive: number
   rpm: number
   tireSize: number
-  carWeight: number
-  carPower: number
-  carTorque: number
   car: string
 }
 
-export function PerformanceSimulator({
-  gears,
-  finalDrive,
-  rpm,
-  tireSize,
-  carWeight,
-  carPower,
-  carTorque,
-  car,
-}: PerformanceSimulatorProps) {
+export function PerformanceSimulator({ gears, finalDrive, rpm, tireSize, car }: PerformanceSimulatorProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [animationProgress, setAnimationProgress] = useState(0)
   const [isAnimating, setIsAnimating] = useState(false)
@@ -35,13 +23,9 @@ export function PerformanceSimulator({
 
   // Calculate performance metrics
   useEffect(() => {
-    // Simple performance calculation based on power-to-weight ratio and gearing
-    const powerToWeightRatio = carPower / carWeight
-    const torqueToWeightRatio = carTorque / carWeight
-
-    // Quarter mile calculation (simplified)
-    const quarterTime = 12.5 - powerToWeightRatio * 10 + finalDrive / 10
-    const quarterSpeed = 100 + powerToWeightRatio * 100 - finalDrive * 2
+    // Simplified performance calculation based on gearing
+    const quarterTime = 13.5 - (1 / finalDrive) * 2
+    const quarterSpeed = 100 + (1 / finalDrive) * 50
 
     // Half mile calculation
     const halfTime = quarterTime * 1.6
@@ -51,7 +35,7 @@ export function PerformanceSimulator({
     setQuarterMileSpeed(Math.max(80, Math.min(160, quarterSpeed)))
     setHalfMileTime(Math.max(14, Math.min(25, halfTime)))
     setHalfMileSpeed(Math.max(100, Math.min(200, halfSpeed)))
-  }, [gears, finalDrive, rpm, tireSize, carWeight, carPower, carTorque])
+  }, [gears, finalDrive, rpm, tireSize])
 
   // Draw the simulation
   useEffect(() => {
@@ -193,9 +177,6 @@ export function PerformanceSimulator({
     finalDrive,
     rpm,
     tireSize,
-    carWeight,
-    carPower,
-    carTorque,
     car,
     quarterMileTime,
     quarterMileSpeed,

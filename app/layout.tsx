@@ -1,6 +1,7 @@
 import type React from "react"
 import { Inter } from "next/font/google"
 import { ThemeProvider } from "@/components/theme-provider"
+import { PageTransition } from "@/components/ui/page-transition"
 import "./globals.css"
 
 const inter = Inter({ subsets: ["latin"] })
@@ -18,10 +19,10 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning className="scroll-smooth">
+    <html lang="en" suppressHydrationWarning className="scroll-smooth opacity-50 opacity-45 opacity-40 opacity-35 opacity-30 opacity-100">
       <body className={inter.className}>
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false} forcedTheme="dark">
-          {children}
+          <PageTransition mode="fade">{children}</PageTransition>
         </ThemeProvider>
       </body>
     </html>

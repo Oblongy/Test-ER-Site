@@ -39,8 +39,7 @@ export function RatioVisualizer({ gears, primaryGear, finalDrive, rpm, tireSize 
 
     // Calculate speeds for each gear
     const speeds = gears.map((gear) => {
-      const combinedRatio = gear * finalDrive * primaryGear
-      return (rpm * tireSize * Math.PI) / (combinedRatio * 336)
+      return (rpm * tireSize * Math.PI) / (gear * finalDrive * primaryGear * 336)
     })
 
     // Find max speed for scaling
@@ -125,9 +124,6 @@ export function RatioVisualizer({ gears, primaryGear, finalDrive, rpm, tireSize 
     gears.forEach((gear, index) => {
       const color = colors[index % colors.length]
 
-      // Calculate combined ratio
-      const combinedRatio = gear * finalDrive * primaryGear
-
       // Draw gear curve
       ctx.strokeStyle = color
       ctx.lineWidth = 3
@@ -137,7 +133,7 @@ export function RatioVisualizer({ gears, primaryGear, finalDrive, rpm, tireSize 
       for (let speed = 0; speed <= maxSpeed; speed += maxSpeed / 200) {
         // Calculate RPM for this speed
         // RPM = (speed × gear ratio × final drive × 336) ÷ (tire diameter × π)
-        const calculatedRPM = (speed * combinedRatio * 336) / (tireSize * Math.PI)
+        const calculatedRPM = (speed * gear * finalDrive * primaryGear * 336) / (tireSize * Math.PI)
 
         if (calculatedRPM <= rpm) {
           const x = padding.left + (speed / maxSpeed) * chartWidth
@@ -161,7 +157,7 @@ export function RatioVisualizer({ gears, primaryGear, finalDrive, rpm, tireSize 
       // Draw shift points
       if (index < gears.length - 1) {
         const nextGear = gears[index + 1]
-        const speedAtMaxRPM = (rpm * tireSize * Math.PI) / (combinedRatio * 336)
+        const speedAtMaxRPM = (rpm * tireSize * Math.PI) / (gear * finalDrive * primaryGear * 336)
         const nextGearRPM = (speedAtMaxRPM * nextGear * finalDrive * primaryGear * 336) / (tireSize * Math.PI)
 
         const x = padding.left + (speedAtMaxRPM / maxSpeed) * chartWidth
@@ -187,8 +183,7 @@ export function RatioVisualizer({ gears, primaryGear, finalDrive, rpm, tireSize 
     // Add gear labels
     gears.forEach((gear, index) => {
       const color = colors[index % colors.length]
-      const combinedRatio = gear * finalDrive * primaryGear
-      const speedAtMaxRPM = (rpm * tireSize * Math.PI) / (combinedRatio * 336)
+      const speedAtMaxRPM = (rpm * tireSize * Math.PI) / (gear * finalDrive * primaryGear * 336)
 
       if (speedAtMaxRPM <= maxSpeed) {
         const x = padding.left + (speedAtMaxRPM / maxSpeed) * chartWidth
