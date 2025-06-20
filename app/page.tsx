@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react"
 import Link from "next/link"
-import { ArrowRight, Settings, Calculator, Trophy, Gauge, Zap } from "lucide-react" // Removed Clock icon
+import { ArrowRight, Settings, Calculator, Trophy, Gauge, Zap } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Button3D } from "@/components/ui/button-3d"
 import { NavBar } from "@/components/nav-bar"
@@ -88,13 +88,6 @@ export default function Home() {
       icon: <Zap className="h-10 w-10" />,
       link: "/ratio-maker?tab=performance",
     },
-    // Removed the "Lap Timer" item
-    // {
-    //   title: "Lap Timer",
-    //   description: "Track and analyze your lap times with precision. Compare sessions and monitor your progress.",
-    //   icon: <Clock className="h-10 w-10" />,
-    //   link: "#",
-    // },
   ]
 
   return (
@@ -145,17 +138,15 @@ export default function Home() {
             >
               <Link href="#features">Explore Features</Link>
             </Button>
-          </div>
-        </div>
 
-        <div className="absolute bottom-8 left-0 right-0 z-10 flex justify-center animate-slide-up stagger-3">
-          <Link
-            href="#features"
-            className="flex animate-bounce flex-col items-center text-sm text-gray-400 transition-colors hover:text-red-600"
-          >
-            <span>Scroll Down</span>
-            <ArrowRight className="mt-1 h-4 w-4 rotate-90" />
-          </Link>
+            <Link
+              href="#features"
+              className="mt-8 flex animate-bounce flex-col items-center text-sm text-gray-400 transition-colors hover:text-red-600"
+            >
+              <span>Scroll Down</span>
+              <ArrowRight className="mt-1 h-4 w-4 rotate-90" />
+            </Link>
+          </div>
         </div>
       </GradientBackground>
 
@@ -164,7 +155,7 @@ export default function Home() {
         <div className="container mx-auto px-4">
           <AnimatedText
             text="Premium Features"
-            className="mb-16 text-center text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl"
+            className="mb-16 text-center text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl custom-word-spacing" // Added custom-word-spacing class
             highlightWords={["Premium"]}
           />
 
