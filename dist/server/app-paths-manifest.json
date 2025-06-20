@@ -1,3 +1,4 @@
 {
-  "/page": "app/page.js"
+  "/page": "app/page.js",
+  "/ratio-maker/page": "app/ratio-maker/page.js"
 }
