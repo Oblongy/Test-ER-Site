@@ -4,8 +4,19 @@ import { useState, useEffect, useRef, useCallback } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { Play, RefreshCw } from "lucide-react"
+import { Play, RefreshCw, Trophy } from "lucide-react"
 import { cn } from "@/lib/utils"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { submitReactionTime, getTopReactionTimes } from "@/actions/reaction-times"
 
 interface ReactionTimeAnalyzerProps {
   className?: string
@@ -20,105 +31,144 @@ interface ReactionLogEntry {
   result: "perfect" | "early" | "late"
 }
 
+interface LeaderboardEntry {
+  id: string
+  username: string
+  reaction_time: number
+  result: string
+  created_at: string
+}
+
 export function ReactionTimeAnalyzer({ className }: ReactionTimeAnalyzerProps) {
-  // lights array: [yellow1, yellow2, yellow3, green/red, preStage, stage]
-  const [lights, setLights] = useState<LightState[]>(["off", "off", "off", "off", "off", "off"])
+  const [lights, setLights] = useState<LightState[]>(["off", "off", "off", "off"]) // Y1, Y2, Y3, Go/Red
   const [isStarted, setIsStarted] = useState(false)
   const [isMeasuring, setIsMeasuring] = useState(false)
   const [reactionTime, setReactionTime] = useState<number | null>(null)
   const [feedback, setFeedback] = useState<string | null>(null)
   const [log, setLog] = useState<ReactionLogEntry[]>([])
+  const [showSubmitDialog, setShowSubmitDialog] = useState(false)
+  const [username, setUsername] = useState("")
+  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([])
+  const [isLoadingLeaderboard, setIsLoadingLeaderboard] = useState(true)
 
-  const timerRef = useRef<NodeJS.Timeout | null>(null)
+  const greenLightTimerRef = useRef<NodeJS.Timeout | null>(null) // Specific ref for the green light timer
   const greenLightTimeRef = useRef<number | null>(null)
 
+  const fetchLeaderboard = useCallback(async () => {
+    setIsLoadingLeaderboard(true)
+    const { data, success } = await getTopReactionTimes(10)
+    if (success) {
+      setLeaderboard(data as LeaderboardEntry[])
+    }
+    setIsLoadingLeaderboard(false)
+  }, [])
+
+  useEffect(() => {
+    fetchLeaderboard()
+  }, [fetchLeaderboard])
+
   const startSequence = useCallback(() => {
-    // Clear any existing timers
-    if (timerRef.current) clearTimeout(timerRef.current)
+    console.log("--- Starting new sequence ---")
+    // Clear any existing green light timer
+    if (greenLightTimerRef.current) {
+      clearTimeout(greenLightTimerRef.current)
+      greenLightTimerRef.current = null
+      console.log("Cleared previous green light timer.")
+    }
 
     // Reset states
-    setLights(["off", "off", "off", "off", "off", "off"]) // All off
+    setLights(["off", "off", "off", "off"]) // All off
     setIsStarted(true)
     setIsMeasuring(false)
     setReactionTime(null)
     setFeedback(null)
     greenLightTimeRef.current = null
+    setShowSubmitDialog(false) // Close dialog if open
 
-    // Sequence of lights (Full Tree / Sportsman Tree Timing)
-    // Total sequence duration: 0.5s (pre-stage) + 1.0s (stage) + 0.5s (Y1) + 0.5s (Y2) + 0.5s (Y3) + 0.5s (Green) = 3.5s
+    // Sportsman Tree Timing: Yellows sequentially, then green after 0.5s from last yellow
+    let currentDelay = 0
+    const lightInterval = 500 // 0.5 seconds between lights
 
-    // 0.5s: Pre-stage on (lights[4])
-    timerRef.current = setTimeout(() => {
-      setLights((prev) => {
-        const newLights = [...prev]
-        newLights[4] = "yellow"
-        return newLights
-      })
-    }, 500)
+    // Yellow 1
+    setTimeout(
+      () => {
+        setLights((prev) => {
+          const newLights = [...prev]
+          newLights[0] = "yellow"
+          return newLights
+        })
+        console.log("Yellow 1 on at", currentDelay + lightInterval, "ms")
+      },
+      (currentDelay += lightInterval),
+    )
 
-    // 1.5s: Stage on (lights[5])
-    timerRef.current = setTimeout(() => {
-      setLights((prev) => {
-        const newLights = [...prev]
-        newLights[5] = "yellow"
-        return newLights
-      })
-    }, 1500)
+    // Yellow 2
+    setTimeout(
+      () => {
+        setLights((prev) => {
+          const newLights = [...prev]
+          newLights[1] = "yellow"
+          return newLights
+        })
+        console.log("Yellow 2 on at", currentDelay + lightInterval, "ms")
+      },
+      (currentDelay += lightInterval),
+    )
 
-    // 2.0s: Yellow 1 on (lights[0])
-    timerRef.current = setTimeout(() => {
-      setLights((prev) => {
-        const newLights = [...prev]
-        newLights[0] = "yellow"
-        return newLights
-      })
-    }, 2000)
+    // Yellow 3
+    setTimeout(
+      () => {
+        setLights((prev) => {
+          const newLights = [...prev]
+          newLights[2] = "yellow"
+          return newLights
+        })
+        console.log("Yellow 3 on at", currentDelay + lightInterval, "ms")
+      },
+      (currentDelay += lightInterval),
+    )
 
-    // 2.5s: Yellow 2 on (lights[1])
-    timerRef.current = setTimeout(() => {
-      setLights((prev) => {
-        const newLights = [...prev]
-        newLights[1] = "yellow"
-        return newLights
-      })
-    }, 2500)
-
-    // 3.0s: Yellow 3 on (lights[2])
-    timerRef.current = setTimeout(() => {
-      setLights((prev) => {
-        const newLights = [...prev]
-        newLights[2] = "yellow"
-        return newLights
-      })
-    }, 3000)
-
-    // 3.5s: All yellows off, Green on (lights[3])
-    timerRef.current = setTimeout(() => {
+    // Green Light
+    const greenLightDelay = currentDelay + lightInterval
+    console.log("Setting green light timer for", greenLightDelay, "ms")
+    greenLightTimerRef.current = setTimeout(() => {
+      console.log("Green light setTimeout callback fired!")
       setLights((prev) => {
         const newLights = [...prev]
         newLights[0] = "off" // Turn off all yellows
         newLights[1] = "off"
         newLights[2] = "off"
         newLights[3] = "green" // Green light
+        console.log("Lights state after green:", newLights)
         return newLights
       })
       greenLightTimeRef.current = performance.now() // Mark green light time
       setIsMeasuring(true) // Now we are measuring
-      console.log("Green light on at:", greenLightTimeRef.current) // Debugging log
-    }, 3500)
+      console.log("Green light time set:", greenLightTimeRef.current)
+    }, greenLightDelay)
   }, [])
 
   const handleReaction = useCallback(() => {
+    console.log(
+      "handleReaction called. isStarted:",
+      isStarted,
+      "isMeasuring:",
+      isMeasuring,
+      "greenLightTimeRef.current:",
+      greenLightTimeRef.current,
+    )
     if (!isStarted) return // Do nothing if sequence hasn't started
-
-    // Clear any pending green light timer if a reaction occurs
-    if (timerRef.current) {
-      clearTimeout(timerRef.current)
-      timerRef.current = null // Ensure it's nullified
-    }
 
     if (greenLightTimeRef.current === null) {
       // User reacted before green light (red light)
+      console.log("RED LIGHT path taken.")
+      // Clear the pending green light timer if it exists
+      if (greenLightTimerRef.current) {
+        clearTimeout(greenLightTimerRef.current)
+        greenLightTimerRef.current = null
+        console.log("Cleared pending green light timer due to red light.")
+      }
+
       setLights((prev) => {
         const newLights = [...prev]
         newLights[0] = "off" // Turn off yellows
@@ -137,7 +187,11 @@ export function ReactionTimeAnalyzer({ className }: ReactionTimeAnalyzerProps) {
       ])
     } else {
       // User reacted after green light (or exactly on it)
-      if (!isMeasuring) return // Prevent multiple reactions after green
+      console.log("GREEN LIGHT path taken.")
+      if (!isMeasuring) {
+        console.log("Not measuring, returning to prevent multiple reactions.")
+        return // Prevent multiple reactions after green
+      }
 
       const reaction = performance.now() - greenLightTimeRef.current
       setReactionTime(reaction)
@@ -149,6 +203,7 @@ export function ReactionTimeAnalyzer({ className }: ReactionTimeAnalyzerProps) {
         // 0.000 to 0.050 seconds (50ms) is considered a perfect reaction
         setFeedback(`PERFECT! (+${reaction.toFixed(3)}s)`)
         result = "perfect"
+        setShowSubmitDialog(true) // Show dialog for perfect reaction
       } else {
         setFeedback(`TOO LATE! (+${reaction.toFixed(3)}s)`)
         result = "late"
@@ -159,7 +214,30 @@ export function ReactionTimeAnalyzer({ className }: ReactionTimeAnalyzerProps) {
         ...prev,
       ])
     }
-  }, [isStarted, isMeasuring])
+  }, [isStarted, isMeasuring, log, setShowSubmitDialog])
+
+  const handleSubmitScore = async () => {
+    if (!username.trim() || reactionTime === null) return
+
+    const latestLogEntry = log[0] // Get the most recent entry
+    if (!latestLogEntry) return
+
+    const { success, message } = await submitReactionTime({
+      username: username.trim(),
+      reaction_time: Number.parseFloat(latestLogEntry.time.toFixed(3)),
+      result: latestLogEntry.result,
+    })
+
+    if (success) {
+      console.log(message)
+      setShowSubmitDialog(false)
+      setUsername("")
+      fetchLeaderboard() // Refresh leaderboard after submission
+    } else {
+      console.error(message)
+      // Optionally show an error toast
+    }
+  }
 
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {
@@ -171,9 +249,11 @@ export function ReactionTimeAnalyzer({ className }: ReactionTimeAnalyzerProps) {
     window.addEventListener("keydown", handleKeyPress)
     return () => {
       window.removeEventListener("keydown", handleKeyPress)
-      if (timerRef.current) {
-        clearTimeout(timerRef.current)
-        timerRef.current = null // Ensure it's nullified on cleanup
+      // Clear the green light timer if the component unmounts or dependencies change
+      if (greenLightTimerRef.current) {
+        clearTimeout(greenLightTimerRef.current)
+        greenLightTimerRef.current = null
+        console.log("Cleanup: Cleared green light timer.")
       }
     }
   }, [handleReaction])
@@ -187,35 +267,13 @@ export function ReactionTimeAnalyzer({ className }: ReactionTimeAnalyzerProps) {
   return (
     <Card className={cn("bg-zinc-900 text-white", className)}>
       <CardHeader>
-        <CardTitle>Christmas Tree Simulator</CardTitle>
+        <CardTitle>Sportsman Tree Simulator</CardTitle>
         <CardDescription className="text-gray-400">
           Click "Start" and hit any key or click the screen when the green light comes on.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="flex flex-col items-center justify-center space-y-2">
-          {/* Pre-Stage and Stage Lights (smaller) */}
-          <div className="flex flex-col items-center space-y-1">
-            <motion.div
-              className={cn(
-                "w-4 h-4 rounded-full border-2 border-zinc-700",
-                lights[4] === "yellow" && "bg-yellow-500 shadow-md shadow-yellow-500/50",
-              )}
-              initial={{ opacity: 0.5 }}
-              animate={{ opacity: lights[4] === "yellow" ? 1 : 0.5 }}
-              transition={{ duration: 0.2 }}
-            />
-            <motion.div
-              className={cn(
-                "w-4 h-4 rounded-full border-2 border-zinc-700",
-                lights[5] === "yellow" && "bg-yellow-500 shadow-md shadow-yellow-500/50",
-              )}
-              initial={{ opacity: 0.5 }}
-              animate={{ opacity: lights[5] === "yellow" ? 1 : 0.5 }}
-              transition={{ duration: 0.2 }}
-            />
-          </div>
-
           {/* Main Yellow Lights (larger) */}
           <div className="flex flex-col items-center space-y-2">
             <motion.div
@@ -307,10 +365,15 @@ export function ReactionTimeAnalyzer({ className }: ReactionTimeAnalyzerProps) {
             onClick={() => {
               setIsStarted(false)
               setIsMeasuring(false)
-              setLights(["off", "off", "off", "off", "off", "off"])
+              setLights(["off", "off", "off", "off"]) // Reset all 4 lights
               setReactionTime(null)
               setFeedback(null)
-              if (timerRef.current) clearTimeout(timerRef.current)
+              if (greenLightTimerRef.current) {
+                clearTimeout(greenLightTimerRef.current)
+                greenLightTimerRef.current = null
+                console.log("Reset button: Cleared green light timer.")
+              }
+              setShowSubmitDialog(false) // Close dialog on reset
             }}
             disabled={!isStarted && !isMeasuring && reactionTime === null}
           >
@@ -347,6 +410,83 @@ export function ReactionTimeAnalyzer({ className }: ReactionTimeAnalyzerProps) {
             </div>
           )}
         </div>
+
+        <div className="mt-8">
+          <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+            <Trophy className="h-5 w-5 text-yellow-400" /> Global Leaderboard
+          </h3>
+          {isLoadingLeaderboard ? (
+            <p className="text-center text-gray-500">Loading leaderboard...</p>
+          ) : leaderboard.length === 0 ? (
+            <p className="text-center text-gray-500">No scores on the leaderboard yet. Be the first!</p>
+          ) : (
+            <div className="max-h-[300px] overflow-y-auto pr-2">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-zinc-800 text-gray-400">
+                    <th className="py-2 text-left">Rank</th>
+                    <th className="py-2 text-left">Username</th>
+                    <th className="py-2 text-left">Reaction (s)</th>
+                    <th className="py-2 text-left">Date</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {leaderboard.map((entry, index) => (
+                    <tr key={entry.id} className="border-b border-zinc-800">
+                      <td className="py-2">{index + 1}</td>
+                      <td className="py-2 font-medium">{entry.username}</td>
+                      <td className="py-2 tabular-nums">{entry.reaction_time.toFixed(3)}</td>
+                      <td className="py-2 text-gray-500">{new Date(entry.created_at).toLocaleDateString()}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+
+        <Dialog open={showSubmitDialog} onOpenChange={setShowSubmitDialog}>
+          <DialogContent className="sm:max-w-[425px] bg-zinc-900 text-white border-zinc-700">
+            <DialogHeader>
+              <DialogTitle>Submit Your Score!</DialogTitle>
+              <DialogDescription className="text-gray-400">
+                You got a perfect reaction time! Enter your username to add your score to the global leaderboard.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="username" className="text-right">
+                  Username
+                </Label>
+                <Input
+                  id="username"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  className="col-span-3 bg-zinc-800 border-zinc-700 text-white"
+                  placeholder="Your racing name"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label className="text-right">Reaction Time</Label>
+                <Input
+                  value={reactionTime !== null ? reactionTime.toFixed(3) : ""}
+                  readOnly
+                  className="col-span-3 bg-zinc-800 border-zinc-700 text-white"
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button
+                type="submit"
+                onClick={handleSubmitScore}
+                disabled={!username.trim() || reactionTime === null}
+                className="bg-green-600 text-white hover:bg-green-700"
+              >
+                Submit Score
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </CardContent>
     </Card>
   )
